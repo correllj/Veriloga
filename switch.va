@@ -1,0 +1,42 @@
+// VerilogA for CIC6_V3, lib_comparator_va, veriloga
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lib_va_comparator(vinp,vinn,clk,voutp,voutn,rdy);
+input vinp,vinn,clk;
+electrical vinp,vinn,clk;
+
+output voutp,voutn,rdy;
+electrical voutp,voutn,rdy;
+
+parameter real par_vdd = 0.9;
+
+integer decision;
+integer irdy;
+
+analog begin
+        @(initial_step) begin
+                decision = 0;
+                irdy = 0;
+        end
+
+
+        @(cross (V(clk) - par_vdd/2, 1)) begin
+                irdy = 1;
+                if (V(vinp) >= V(vinn))
+                        decision = 1;
+                else
+                        decision = 0;
+                end
+        @(cross (V(clk) - par_vdd/2, -1))begin
+                irdy = 0;
+        end
+
+
+V(voutp) <+ transition(par_vdd*decision,10p,10p,10p);
+V(voutn) <+ transition(par_vdd*(1-decision),10p,10p,10p);
+V(rdy)   <+ transition(par_vdd*irdy,30p,10p,10p);
+end
+
+endmodule

@@ -1,0 +1,50 @@
+// VerilogA for CIC6_V3, lib_digital_va, veriloga
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lib_va_digital(CLK_IN,CLK_OUT,SAMP1,SAMP2,COMP1,COMP2,EN8,EN4,BUS_H,BUS_L,EN2,EN1,TR_H,TR_L);
+input CLK_IN;
+output CLK_OUT,SAMP1,SAMP2,COMP1,COMP2,EN8,EN4,BUS_H,BUS_L,EN2,EN1,TR_H,TR_L;
+electrical CLK_IN, CLK_OUT,SAMP1,SAMP2,COMP1,COMP2,EN8,EN4,BUS_H,BUS_L,EN2,EN1,TR_H,TR_L;
+
+parameter real
+	Vgain = 1.0,
+	Vthreshold = 0.5,
+	tdly = 0,
+	trise = 10p,
+	tfall = 10p;
+
+
+integer fid;
+integer int_Q [0:12];
+integer j;
+
+
+analog begin
+	@(initial_step) begin
+		fid = $fopen("/afs/eecs.umich.edu/analog/users/correllj/TSMC_N28HPC+/MATLAB/waveforms/waveforms.dat","r");
+	end
+	@(cross(V(CLK_IN)-Vthreshold, 1)) begin
+		for(j=0;j<=12; j=j+1) begin
+			$fscanf(fid, "%d", int_Q[j]);
+		end
+//		$fscanf(fid, "%d", int_Q);
+	end
+
+	V(CLK_OUT)	<+ transition(int_Q[0]*Vgain, tdly, trise, tfall);
+	V(SAMP1)		<+ transition(int_Q[1]*Vgain, tdly, trise, tfall);
+	V(SAMP2)	<+ transition(int_Q[2]*Vgain, tdly, trise, tfall);
+	V(COMP1)		<+ transition(int_Q[3]*Vgain, tdly, trise, tfall);
+	V(COMP2)	<+ transition(int_Q[4]*Vgain, tdly, trise, tfall);
+	V(EN8)		<+ transition(int_Q[5]*Vgain, tdly, trise, tfall);
+	V(EN4)		<+ transition(int_Q[6]*Vgain, tdly, trise, tfall);
+	V(BUS_H)	<+ transition(int_Q[7]*Vgain, tdly, trise, tfall);
+	V(BUS_L)		<+ transition(int_Q[8]*Vgain, tdly, trise, tfall);
+	V(EN2)		<+ transition(int_Q[9]*Vgain, tdly, trise, tfall);
+	V(EN1)		<+ transition(int_Q[10]*Vgain, tdly, trise, tfall);
+	V(TR_H)		<+ transition(int_Q[11]*Vgain, tdly, trise, tfall);
+	V(TR_L)		<+ transition(int_Q[12]*Vgain, tdly, trise, tfall);
+end
+
+endmodule

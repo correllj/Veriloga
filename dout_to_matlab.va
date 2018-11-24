@@ -1,0 +1,49 @@
+// VerilogA for CIC6_V3, lib_va_dout_to_matlab, veriloga
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lib_va_dout_to_matlab_x1(D,Clk1);
+
+input Clk1;
+input [5:0]D; 
+electrical Clk1;
+electrical [5:0]D;
+
+parameter real par_vdd = 0.9;
+
+real Cross_point;
+integer file;
+integer value;
+
+analog begin
+	@(initial_step) begin
+		file = $fopen("/afs/eecs.umich.edu/analog/users/correllj/TSMC_N28HPC+/MATLAB/output_x1","w");
+	end
+
+	@(cross(V(Clk1)-par_vdd/2, -1)) begin
+		value = 0;
+		if(V(D[5]) >= par_vdd) begin
+			value = value + 32;
+		end
+		if(V(D[4]) >= par_vdd) begin
+			value = value + 16;
+		end
+		if(V(D[3]) >= par_vdd) begin
+			value = value + 8;
+		end
+		if(V(D[2]) >= par_vdd) begin
+			value = value + 4;
+		end
+		if(V(D[1]) >= par_vdd) begin
+			value = value + 2;
+		end
+		if(V(D[0]) >= par_vdd) begin
+			value = value + 1;
+		end
+		$fwrite(file, "%d \n", value);
+	end
+
+end
+
+endmodule
